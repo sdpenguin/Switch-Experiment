@@ -14,7 +14,7 @@ public:
         return _count;
     }
 
-    int write(int new_count) {
+    void write(int new_count) {
         _count = new_count;
     }
  
