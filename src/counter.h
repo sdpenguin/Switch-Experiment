@@ -13,6 +13,10 @@ public:
     int read() {
         return _count;
     }
+
+    int write(int new_count) {
+        _count = new_count;
+    }
  
 private:
     InterruptIn _interrupt;
