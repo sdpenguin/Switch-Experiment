@@ -17,7 +17,9 @@ Counter *switch_position[4];
 Ticker  timer;
 
 volatile uint16_t switch_count[4] = { 0, 0, 0, 0 };
+volatile uint16_t switch_pressed[4] = { 0, 0, 0, 0 };
 volatile uint16_t update = 0;
+uint16_t max_count[4];
 
 // Initialise display
 SPInit gSpi(D_MOSI_PIN, NC, D_CLK_PIN);	
@@ -64,6 +66,14 @@ void tout(void)
 	for (int i = 0; i < 3; ++i) {
 		switch_count[i] = switch_position[i]->read();
 		switch_position[i]->write(0);
+
+		if (max_count[i] < switch_count[i])
+			max_count[i] = switch_count[i];
+
+		if (switch_count[i] < (3/5)*max_count[i])
+			switch_pressed[i] = 1;
+		else if (switch_count[i] > (4/5)*max_count[i])
+			switch_pressed[i] = 0;
 	}
 	// Update display
 	update = 1;
