@@ -47,8 +47,9 @@ int main(void)
 
 			//Write the latest switch osciallor count
 			for (int i = 0; i < 3; ++i) {
-				oled.printf("\n%05u  ", switch_count[i]);
+				oled.printf("\nS:%u C:%05u", switch_pressed[i], switch_count[i]);
 			}
+
 
 			//Copy the display buffer to the display
 			oled.display();
@@ -71,9 +72,9 @@ void tout(void)
 		if (max_count[i] < switch_count[i])
 			max_count[i] = switch_count[i];
 
-		if (switch_count[i] < (3/5)*max_count[i])
+		if (switch_count[i] < (3*max_count[i])/5)
 			switch_pressed[i] = 1;
-		else if (switch_count[i] > (4/5)*max_count[i])
+		else if (switch_count[i] > (4*max_count[i])/5)
 			switch_pressed[i] = 0;
 	}
 	// Update display
