@@ -7,14 +7,15 @@
 #define SW_PERIOD 20000 // 20ms
 
 void tout(void);
+void pwm_invert(void);
 
 // Onboard LED 
-DigitalOut alive(LED1);
-
+DigitalOut out_wave(LED1);
 PinName switch_pin[] = { SW_PINS };
 
 Counter *switch_position[4];
-Ticker  timer;
+Ticker timer;
+Ticker pwm;
 
 volatile uint16_t switch_count[4] = { 0, 0, 0, 0 };
 volatile uint16_t switch_pressed[4] = { 0, 0, 0, 0 };
@@ -60,12 +61,15 @@ int main(void)
 
 			uint16_t frequency = 1000*current_f[3] + 100*current_f[2] + 10*current_f[1] + current_f[0];
 
-			oled.printf("\nF:%u F:%d", frequency, frequency);
+			oled.printf("\nF:%u   ", frequency);
+
+			if (frequency < 25)
+				pwm.attach_ms(&pwm_invert, 500/frequency);
+			else
+				pwm.attach_us(&pwm_invert, 500000/frequency);
 
 			//Copy the display buffer to the display
 			oled.display();
-
-			alive = !alive;
 		}
 
 	}
@@ -89,4 +93,8 @@ void tout(void)
 	}
 	// Update display
 	update = 1;
+}
+
+void pwm_invert(void){
+	out_wave = !out_wave;
 }
