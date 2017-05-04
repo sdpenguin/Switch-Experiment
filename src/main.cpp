@@ -3,7 +3,7 @@
 #include "counter.h"
 #include "Adafruit_SSD1306.h"
 
-#define SW_PINS p25, p24, p24, p22
+#define SW_PINS p24, p24, p22, p21
 #define SW_PERIOD 20000 // 20ms
 
 void tout(void);
