@@ -28,7 +28,6 @@ Adafruit_SSD1306_Spi oled(gSpi, D_DC_PIN, D_RST_PIN, D_CS_PIN, 64, 128);
 int main(void)
 {
 	oled.setRotation(2);
-	oled.printf("%ux%u Group Ay08-04\r\n", oled.width(), oled.height());
 	wait(0.5);
 
 	// Enable ISR for the switch rising edge
@@ -38,6 +37,9 @@ int main(void)
 
 	//Attach switch sampling timer ISR to the timer instance with the required period
 	timer.attach_us(&tout, SW_PERIOD);
+
+	oled.clearDisplay();
+	oled.printf("%ux%u Group Ay08-04\r\n", oled.width(), oled.height());
 
 	for (;;) {
 		if (update) {
