@@ -32,7 +32,7 @@ int main(void)
 	wait(0.5);
 
 	// Enable ISR for the switch rising edge
-	for (int i = 0; i < 3; ++i) {
+	for (int i = 0; i < 4; ++i) {
 		switch_position[i] = new Counter(switch_pin[i]);	
 	}
 
@@ -46,7 +46,7 @@ int main(void)
 			oled.setTextCursor(0, 0);
 
 			//Write the latest switch osciallor count
-			for (int i = 0; i < 3; ++i) {
+			for (int i = 0; i < 4; ++i) {
 				oled.printf("\nS:%u C:%05u", switch_pressed[i], switch_count[i]);
 			}
 
@@ -65,7 +65,7 @@ int main(void)
 void tout(void)
 {
 	// Query how many times switch triggered
-	for (int i = 0; i < 3; ++i) {
+	for (int i = 0; i < 4; ++i) {
 		switch_count[i] = switch_position[i]->read();
 		switch_position[i]->write(0);
 
