@@ -3,7 +3,7 @@
 #include "counter.h"
 #include "Adafruit_SSD1306.h"
 
-#define SW_PINS p22, p23, p24, p25
+#define SW_PINS p25, p24, p24, p22
 #define SW_PERIOD 20000 // 20ms
 
 void tout(void);
@@ -18,6 +18,10 @@ Ticker  timer;
 
 volatile uint16_t switch_count[4] = { 0, 0, 0, 0 };
 volatile uint16_t switch_pressed[4] = { 0, 0, 0, 0 };
+volatile uint16_t last_pressed[4] = { 0, 0, 0, 0 };
+
+uint16_t current_f[4] = { 0, 0, 0, 0 };
+
 volatile uint16_t update = 0;
 uint16_t max_count[4];
 
@@ -47,11 +51,18 @@ int main(void)
 
 			oled.setTextCursor(0, 0);
 
+			int frequency = 0;
 			//Write the latest switch osciallor count
-			for (int i = 0; i < 4; ++i) {
-				oled.printf("\nS:%u C:%05u", switch_pressed[i], switch_count[i]);
+			for (int i = 3; i >= 0; --i) {
+				current_f[i] += (switch_pressed[i] && !last_pressed[i]);
+				if (current_f[i] > 9)
+					current_f[i] = 0;
+				
+				frequency += current_f[i] * (10^i);
+				oled.printf("\nS:%u C:%05u N:%u", switch_pressed[i], switch_count[i], current_f[i]);
 			}
 
+			oled.printf("\nF:%u F:%d", frequency, frequency);
 
 			//Copy the display buffer to the display
 			oled.display();
@@ -70,6 +81,8 @@ void tout(void)
 	for (int i = 0; i < 4; ++i) {
 		switch_count[i] = switch_position[i]->read();
 		switch_position[i]->write(0);
+		
+		last_pressed[i] = switch_pressed[i];
 
 		if (max_count[i] < switch_count[i])
 			max_count[i] = switch_count[i];
