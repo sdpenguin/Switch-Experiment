@@ -23,7 +23,6 @@ volatile uint16_t last_pressed[4] = { 0, 0, 0, 0 };
 uint16_t current_f[4] = { 0, 0, 0, 0 };
 
 volatile uint16_t update = 0;
-uint16_t max_count[4];
 
 // Initialise display
 SPInit gSpi(D_MOSI_PIN, NC, D_CLK_PIN);	
@@ -84,12 +83,9 @@ void tout(void)
 		
 		last_pressed[i] = switch_pressed[i];
 
-		if (max_count[i] < switch_count[i])
-			max_count[i] = switch_count[i];
-
-		if (switch_count[i] < (3*max_count[i])/5)
+		if (switch_count[i] < 600)
 			switch_pressed[i] = 1;
-		else if (switch_count[i] > (4*max_count[i])/5)
+		else if (switch_count[i] > 700)
 			switch_pressed[i] = 0;
 	}
 	// Update display
