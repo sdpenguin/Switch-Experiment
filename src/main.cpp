@@ -50,16 +50,15 @@ int main(void)
 
 			oled.setTextCursor(0, 0);
 
-			int frequency = 0;
 			//Write the latest switch osciallor count
 			for (int i = 3; i >= 0; --i) {
 				current_f[i] += (switch_pressed[i] && !last_pressed[i]);
 				if (current_f[i] > 9)
 					current_f[i] = 0;
-				
-				frequency += current_f[i] * (10^i);
 				oled.printf("\nS:%u C:%05u N:%u", switch_pressed[i], switch_count[i], current_f[i]);
 			}
+
+			uint16_t frequency = 1000*current_f[3] + 100*current_f[2] + 10*current_f[1] + current_f[0];
 
 			oled.printf("\nF:%u F:%d", frequency, frequency);
 
