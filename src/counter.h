@@ -1,24 +1,19 @@
+#ifndef COUNTER_H
+#define COUNTER_H
+
 #include "mbed.h"
 
-class Counter {
-public:
-    Counter(PinName pin) : _interrupt(pin) {        // create the InterruptIn on the pin specified to Counter
-        _interrupt.rise(this, &Counter::increment); // attach increment function of this counter instance
-    }
- 
-    void increment() {
-        _count++;
-    }
- 
-    int read() {
-        return _count;
-    }
-
-    void write(int new_count) {
-        _count = new_count;
-    }
- 
+class Counter
+{
 private:
     InterruptIn _interrupt;
     volatile int _count;
+
+public:
+    Counter(PinName pin);
+    void increment();
+    int read();
+    void write(int new_count);
 };
+
+#endif
