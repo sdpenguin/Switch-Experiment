@@ -146,6 +146,10 @@ clean:
 	$(RM) $(TARGET).$(TARGET_EXT) $(TARGET).bin $(TARGET).map $(OBJ_FOLDER)*.* $(OBJ_FOLDER)
 	@echo ' '
 
+upload: clean all
+	@echo 'Uploading to board!'
+	mv ./build/mbed.bin /run/media/vsz/MBED/mbed.bin
+
 print_info:
 	@echo 'Printing size'
 	arm-none-eabi-size --totals $(OBJ_FOLDER)$(TARGET).$(TARGET_EXT)
