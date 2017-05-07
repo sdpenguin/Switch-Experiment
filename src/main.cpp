@@ -1,4 +1,5 @@
 #include "mbed.h"
+
 #include "spi_init.h"
 #include "counter.h"
 #include "Adafruit_SSD1306.h"
@@ -7,7 +8,8 @@
 #define SW_PERIOD 20000 // 20ms
 
 void tout(void);
-void pwm_invert(void);
+void pwm_invert_fast(void);
+void pwm_invert_slow(void);
 
 // Onboard LED 
 DigitalOut out_wave(LED1);
@@ -24,6 +26,7 @@ volatile uint16_t last_pressed[4] = { 0, 0, 0, 0 };
 uint16_t current_f[4] = { 0, 0, 0, 0 };
 
 volatile uint16_t update = 0;
+volatile uint16_t divider = 0;
 
 // Initialise display
 SPInit gSpi(D_MOSI_PIN, NC, D_CLK_PIN);	
@@ -31,6 +34,7 @@ Adafruit_SSD1306_Spi oled(gSpi, D_DC_PIN, D_RST_PIN, D_CS_PIN, 64, 128);
 
 int main(void)
 {
+	out_wave.write(0.5);
 	oled.setRotation(2);
 	wait(0.5);
 
@@ -63,10 +67,10 @@ int main(void)
 
 			oled.printf("\nF:%u   ", frequency);
 
-			if (frequency < 25)
-				pwm.attach_ms(&pwm_invert, 500/frequency);
-			else
-				pwm.attach_us(&pwm_invert, 500000/frequency);
+			if (frequency > 24)
+				pwm.attach_us(&pwm_invert_fast, 500000/frequency);
+			else if (frequency > 0)
+				pwm.attach_us(&pwm_invert_slow, 25000/frequency);
 
 			//Copy the display buffer to the display
 			oled.display();
@@ -95,6 +99,14 @@ void tout(void)
 	update = 1;
 }
 
-void pwm_invert(void){
-	out_wave = !out_wave;
+void pwm_invert_slow(void){
+	divider++;
+	if (divider % 25 == 0){
+		divider = 0;
+		out_wave = !out_wave;
+	}
+}
+
+void pwm_invert_fast(void){
+		out_wave = !out_wave;
 }
