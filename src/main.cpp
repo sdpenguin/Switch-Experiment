@@ -6,6 +6,7 @@
 
 #define SW_PINS p24, p23, p22, p21
 #define SW_PERIOD 20000 // 20ms
+#define ARRAY_SIZE 360
 
 void tout(void);
 void square(void);
@@ -30,9 +31,11 @@ volatile uint16_t update = 0;
 volatile uint16_t amp = 0;
 
 const double pi = 3.141592653589793238462;
-const double offset = 65535/2;
+const double offset = 65535/2; //Offset is 1/2 the total bits
 double rads = 0.0;
 uint16_t sample = 0;
+
+uint16_t sineArray[ARRAY_SIZE];
 
 // Initialise display
 SPInit gSpi(D_MOSI_PIN, NC, D_CLK_PIN);	
@@ -40,6 +43,12 @@ Adafruit_SSD1306_Spi oled(gSpi, D_DC_PIN, D_RST_PIN, D_CS_PIN, 64, 128);
 
 int main(void)
 {
+	for(int i=0; i<ARRAY_SIZE; i++)
+	{
+		int rads = (pi * i) / (ARRAY_SIZE/2.0f);
+		sineArray[i] = (uint16_t)(0.5f * (offset * (cos(rads + pi))) + offset);
+	}
+	
 	uint16_t frequency = 0;
 	uint16_t old_frequency = 0;
 
@@ -123,11 +132,11 @@ void triangle(void){
 }
 
 void sine(void){
-	rads = (pi * amp) / 180.0f;
-	sample = (uint16_t)(0.5f * (offset * (cos(rads + pi))) + offset);
-	out_wave.write_u16(sample);
+	if(amp == ARRAY_SIZE)
+		amp = 0;
+	
+	out_wave.write_u16(sineArray[amp]);
 
 	amp++;
-	if(amp == 360)
-		amp = 0;
 }
+
