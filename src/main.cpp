@@ -9,7 +9,6 @@
 
 void tout(void);
 void pwm_invert_fast(void);
-void pwm_invert_slow(void);
 
 // Onboard LED 
 DigitalOut out_wave(LED1);
@@ -34,6 +33,9 @@ Adafruit_SSD1306_Spi oled(gSpi, D_DC_PIN, D_RST_PIN, D_CS_PIN, 64, 128);
 
 int main(void)
 {
+	uint16_t frequency = 0;
+	uint16_t old_frequency = 0;
+
 	out_wave.write(0.5);
 	oled.setRotation(2);
 	wait(0.5);
@@ -63,15 +65,17 @@ int main(void)
 				oled.printf("\nS:%u C:%05u N:%u", switch_pressed[i], switch_count[i], current_f[i]);
 			}
 
-			uint16_t frequency = 1000*current_f[3] + 100*current_f[2] + 10*current_f[1] + current_f[0];
+			old_frequency = frequency;
+			frequency = 1000*current_f[3] + 100*current_f[2] + 10*current_f[1] + current_f[0];
 
-			oled.printf("\nF:%u   ", frequency);
+			if (frequency != old_frequency){
 
-			if (frequency > 24)
-				pwm.attach_us(&pwm_invert_fast, 500000/frequency);
-			else if (frequency > 0)
-				pwm.attach_us(&pwm_invert_slow, 25000/frequency);
+				oled.printf("\nF:%u   ", frequency);
 
+				if (frequency)
+					pwm.attach_us(&pwm_invert_fast, 500000/frequency);
+
+			}
 			//Copy the display buffer to the display
 			oled.display();
 		}
@@ -97,14 +101,6 @@ void tout(void)
 	}
 	// Update display
 	update = 1;
-}
-
-void pwm_invert_slow(void){
-	divider++;
-	if (divider % 25 == 0){
-		divider = 0;
-		out_wave = !out_wave;
-	}
 }
 
 void pwm_invert_fast(void){
