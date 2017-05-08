@@ -8,10 +8,12 @@
 #define SW_PERIOD 20000 // 20ms
 
 void tout(void);
-void pwm_invert_fast(void);
+void square(void);
+void triangle(void);
+void sine(void);
 
 // Onboard LED 
-DigitalOut out_wave(LED1);
+AnalogOut out_wave(p18);
 PinName switch_pin[] = { SW_PINS };
 
 Counter *switch_position[4];
@@ -25,7 +27,12 @@ volatile uint16_t last_pressed[4] = { 0, 0, 0, 0 };
 uint16_t current_f[4] = { 0, 0, 0, 0 };
 
 volatile uint16_t update = 0;
-volatile uint16_t divider = 0;
+volatile uint16_t amp = 0;
+
+const double pi = 3.141592653589793238462;
+const double offset = 65535/2;
+double rads = 0.0;
+uint16_t sample = 0;
 
 // Initialise display
 SPInit gSpi(D_MOSI_PIN, NC, D_CLK_PIN);	
@@ -73,7 +80,7 @@ int main(void)
 				oled.printf("\nF:%u   ", frequency);
 
 				if (frequency)
-					pwm.attach_us(&pwm_invert_fast, 500000/frequency);
+					pwm.attach_us(&sine, 1000000/(frequency*360));
 
 			}
 			//Copy the display buffer to the display
@@ -103,6 +110,24 @@ void tout(void)
 	update = 1;
 }
 
-void pwm_invert_fast(void){
+/*
+void square(void){
 		out_wave = !out_wave;
+}
+*/
+void triangle(void){
+	amp++;
+	out_wave = (float) amp/256;
+	if (amp == 256)
+		amp = 0;
+}
+
+void sine(void){
+	rads = (pi * amp) / 180.0f;
+	sample = (uint16_t)(0.5f * (offset * (cos(rads + pi))) + offset);
+	out_wave.write_u16(sample);
+
+	amp++;
+	if(amp == 360)
+		amp = 0;
 }
