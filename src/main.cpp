@@ -31,6 +31,7 @@ volatile uint16_t amp = 0;
 
 const double pi = 3.141592653589793238462;
 const double offset = 65535 / 2; // Offset is 1/2 the total bits
+double rads = 0.0;
 uint16_t sample = 0;
 
 uint16_t sineArray[ARRAY_SIZE];
