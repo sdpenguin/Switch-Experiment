@@ -1,8 +1,8 @@
 #include "mbed.h"
 
-#include "spi_init.h"
-#include "counter.h"
 #include "Adafruit_SSD1306.h"
+#include "counter.h"
+#include "spi_init.h"
 
 #define SW_PINS p24, p23, p22, p21
 #define SW_PERIOD 20000 // 20ms
@@ -14,23 +14,23 @@ void triangle(void);
 void sine(void);
 
 AnalogOut out_wave(p18);
-PinName switch_pin[] = { SW_PINS };
+PinName switch_pin[] = {SW_PINS};
 
 Counter *switch_position[4];
 Ticker timer;
 Ticker pwm;
 
-volatile uint16_t switch_count[4] = { 0, 0, 0, 0 };
-volatile uint16_t switch_pressed[4] = { 0, 0, 0, 0 };
-volatile uint16_t last_pressed[4] = { 0, 0, 0, 0 };
+volatile uint16_t switch_count[4] = {0, 0, 0, 0};
+volatile uint16_t switch_pressed[4] = {0, 0, 0, 0};
+volatile uint16_t last_pressed[4] = {0, 0, 0, 0};
 
-uint16_t current_f[4] = { 0, 0, 0, 0 };
+uint16_t current_f[4] = {0, 0, 0, 0};
 
 volatile uint16_t update = 0;
 volatile uint16_t amp = 0;
 
 const double pi = 3.141592653589793238462;
-const double offset = 65535/2; //Offset is 1/2 the total bits
+const double offset = 65535 / 2; // Offset is 1/2 the total bits
 double rads = 0.0;
 uint16_t sample = 0;
 
@@ -42,10 +42,10 @@ Adafruit_SSD1306_Spi oled(gSpi, D_DC_PIN, D_RST_PIN, D_CS_PIN, 64, 128);
 
 int main(void)
 {
-	for(int i=0; i<ARRAY_SIZE; i++)
-	{
-		int rads = (pi * i) / (ARRAY_SIZE/2.0f);
-		sineArray[i] = (uint16_t)(0.5f * (offset * (cos(rads + pi))) + offset);
+	for (int i = 0; i < ARRAY_SIZE; i++) {
+		int rads = (pi * i) / (ARRAY_SIZE / 2.0f);
+		sineArray[i] =
+		    (uint16_t)(0.5f * (offset * (cos(rads + pi))) + offset);
 	}
 
 	uint16_t frequency = 0;
@@ -60,7 +60,8 @@ int main(void)
 		switch_position[i] = new Counter(switch_pin[i]);
 	}
 
-	//Attach switch sampling timer ISR to the timer instance with the required period
+	// Attach switch sampling timer ISR to the timer instance with the
+	// required period
 	timer.attach_us(&tout, SW_PERIOD);
 
 	oled.clearDisplay();
@@ -72,7 +73,7 @@ int main(void)
 
 			oled.setTextCursor(0, 0);
 
-			//Write the latest switch osciallor count
+			// Write the latest switch osciallor count
 			for (int i = 3; i >= 0; --i) {
 				current_f[i] += (switch_pressed[i] && !last_pressed[i]);
 				if (current_f[i] > 9)
@@ -81,25 +82,22 @@ int main(void)
 			}
 
 			old_frequency = frequency;
-			frequency = 1000*current_f[3] + 100*current_f[2] + 10*current_f[1] + current_f[0];
+			frequency = 1000 * current_f[3] + 100 * current_f[2] + 10 * current_f[1] + current_f[0];
 
-			if (frequency != old_frequency){
+			if (frequency != old_frequency) {
 
 				oled.printf("\nF:%u   ", frequency);
 
 				if (frequency)
-					pwm.attach_us(&sine, 1000000/(frequency*360));
-
+					pwm.attach_us( &sine, 1000000 / (frequency * 360));
 			}
-			//Copy the display buffer to the display
+			// Copy the display buffer to the display
 			oled.display();
 		}
-
 	}
 }
 
-
-//Interrupt Service Routine for the switch sampling timer
+// Interrupt Service Routine for the switch sampling timer
 void tout(void)
 {
 	// Query how many times switch triggered
@@ -123,17 +121,18 @@ void square(void){
 		out_wave = !out_wave;
 }
 */
-void triangle(void){
+void triangle(void)
+{
 	amp++;
-	out_wave = (float) amp/256;
+	out_wave = (float)amp / 256;
 	if (amp == 256)
 		amp = 0;
 }
 
-void sine(void){
-	if(amp == ARRAY_SIZE)
+void sine(void)
+{
+	if (amp == ARRAY_SIZE)
 		amp = 0;
 	out_wave.write_u16(sineArray[amp]);
 	amp++;
 }
-
