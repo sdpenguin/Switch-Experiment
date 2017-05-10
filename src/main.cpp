@@ -31,7 +31,6 @@ volatile uint16_t amp = 0;
 
 const double pi = 3.141592653589793238462;
 const double offset = 65535 / 2; // Offset is 1/2 the total bits
-double rads = 0.0;
 uint16_t sample = 0;
 
 uint16_t sineArray[ARRAY_SIZE];
@@ -43,9 +42,8 @@ Adafruit_SSD1306_Spi oled(gSpi, D_DC_PIN, D_RST_PIN, D_CS_PIN, 64, 128);
 int main(void)
 {
 	for (int i = 0; i < ARRAY_SIZE; i++) {
-		int rads = (pi * i) / (ARRAY_SIZE / 2.0f);
-		sineArray[i] =
-		    (uint16_t)(0.5f * (offset * (cos(rads + pi))) + offset);
+		rads = (pi * i) / (ARRAY_SIZE / 2.0f);
+		sineArray[i] = (uint16_t)(0.5f * (offset * (cos(rads + pi))) + offset);
 	}
 
 	uint16_t frequency = 0;
