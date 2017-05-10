@@ -13,7 +13,6 @@ void square(void);
 void triangle(void);
 void sine(void);
 
-// Onboard LED 
 AnalogOut out_wave(p18);
 PinName switch_pin[] = { SW_PINS };
 
@@ -38,7 +37,7 @@ uint16_t sample = 0;
 uint16_t sineArray[ARRAY_SIZE];
 
 // Initialise display
-SPInit gSpi(D_MOSI_PIN, NC, D_CLK_PIN);	
+SPInit gSpi(D_MOSI_PIN, NC, D_CLK_PIN);
 Adafruit_SSD1306_Spi oled(gSpi, D_DC_PIN, D_RST_PIN, D_CS_PIN, 64, 128);
 
 int main(void)
@@ -48,7 +47,7 @@ int main(void)
 		int rads = (pi * i) / (ARRAY_SIZE/2.0f);
 		sineArray[i] = (uint16_t)(0.5f * (offset * (cos(rads + pi))) + offset);
 	}
-	
+
 	uint16_t frequency = 0;
 	uint16_t old_frequency = 0;
 
@@ -58,7 +57,7 @@ int main(void)
 
 	// Enable ISR for the switch rising edge
 	for (int i = 0; i < 4; ++i) {
-		switch_position[i] = new Counter(switch_pin[i]);	
+		switch_position[i] = new Counter(switch_pin[i]);
 	}
 
 	//Attach switch sampling timer ISR to the timer instance with the required period
@@ -107,7 +106,7 @@ void tout(void)
 	for (int i = 0; i < 4; ++i) {
 		switch_count[i] = switch_position[i]->read();
 		switch_position[i]->write(0);
-		
+
 		last_pressed[i] = switch_pressed[i];
 
 		if (switch_count[i] < 600)
@@ -134,9 +133,7 @@ void triangle(void){
 void sine(void){
 	if(amp == ARRAY_SIZE)
 		amp = 0;
-	
 	out_wave.write_u16(sineArray[amp]);
-
 	amp++;
 }
 
