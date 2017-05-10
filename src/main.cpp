@@ -6,7 +6,7 @@
 
 #define SW_PINS p24, p23, p22, p21
 #define SW_PERIOD 20000 // 20ms
-#define ARRAY_SIZE 360
+#define SINA_SIZE 360
 
 void tout(void);
 void square(void);
@@ -34,7 +34,10 @@ const double offset = 65535 / 2; // Offset is 1/2 the total bits
 double rads = 0.0;
 uint16_t sample = 0;
 
-uint16_t sineArray[ARRAY_SIZE];
+uint16_t sineArray[SINA_SIZE];
+
+
+int wave_type = 0;
 
 // Initialise display
 SPInit gSpi(D_MOSI_PIN, NC, D_CLK_PIN);
@@ -42,8 +45,8 @@ Adafruit_SSD1306_Spi oled(gSpi, D_DC_PIN, D_RST_PIN, D_CS_PIN, 64, 128);
 
 int main(void)
 {
-	for (int i = 0; i < ARRAY_SIZE; i++) {
-		rads = (pi * i) / (ARRAY_SIZE / 2.0f);
+	for (int i = 0; i < SINA_SIZE; i++) {
+		rads = (pi * i) / (SINA_SIZE / 2.0f);
 		sineArray[i] = (uint16_t)(0.5f * (offset * (cos(rads + pi))) + offset);
 	}
 
@@ -74,10 +77,17 @@ int main(void)
 
 			// Write the latest switch osciallor count
 			for (int i = 3; i >= 0; --i) {
-				current_f[i] += (switch_pressed[i] && !last_pressed[i]);
-				if (current_f[i] > 9)
-					current_f[i] = 0;
-				oled.printf("\nS:%u C:%05u N:%u", switch_pressed[i], switch_count[i], current_f[i]);
+				if (wave_type < 0){
+					oled.printf("Select type of wave\n");
+					oled.printf("Square:2 Triangle:1 Sine:0");
+					if (switch_pressed[i] && !last_pressed[i])
+						wave_type = i;
+				} else {
+					current_f[i] += (switch_pressed[i] && !last_pressed[i]);
+					if (current_f[i] > 9)
+						current_f[i] = 0;
+					oled.printf("\nS:%u C:%05u N:%u", switch_pressed[i], switch_count[i], current_f[i]);
+				}
 			}
 
 			old_frequency = frequency;
@@ -87,8 +97,18 @@ int main(void)
 
 				oled.printf("\nF:%u   ", frequency);
 
-				if (frequency)
-					pwm.attach_us( &sine, 1000000 / (frequency * 360));
+				if (frequency){
+					switch(wave_type){
+						case 1:
+							pwm.attach_us( &square, 1000000 / (frequency * SINA_SIZE));
+							break;
+						case 0:
+							pwm.attach_us( &triangle, 1000000 / (frequency * 100));
+							break;
+						default:
+							pwm.attach_us( &square, 1000000 / (frequency * 2));
+					}
+				}
 			}
 			// Copy the display buffer to the display
 			oled.display();
@@ -115,22 +135,22 @@ void tout(void)
 	update = 1;
 }
 
-/*
+
 void square(void){
 		out_wave = !out_wave;
 }
-*/
+
 void triangle(void)
 {
 	amp++;
-	out_wave = (float)amp / 256;
-	if (amp == 256)
+	out_wave = (float)amp / 100;
+	if (amp == 100)
 		amp = 0;
 }
 
 void sine(void)
 {
-	if (amp == ARRAY_SIZE)
+	if (amp == SINA_SIZE)
 		amp = 0;
 	out_wave.write_u16(sineArray[amp]);
 	amp++;
