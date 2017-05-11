@@ -37,7 +37,7 @@ uint16_t sample = 0;
 uint16_t sineArray[SINA_SIZE];
 
 
-int wave_type = 0;
+int wave_type = -1;
 
 // Initialise display
 SPInit gSpi(D_MOSI_PIN, NC, D_CLK_PIN);
@@ -67,21 +67,22 @@ int main(void)
 	timer.attach_us(&tout, SW_PERIOD);
 
 	oled.clearDisplay();
-	oled.printf("%ux%u Group Ay08-04\r\n", oled.width(), oled.height());
 
 	for (;;) {
 		if (update) {
 			update = 0;
 
 			oled.setTextCursor(0, 0);
+			oled.printf("Wave type: %d     \n", wave_type);
+			oled.printf("Sq:2 Tr:1 Sin:0");
 
 			// Write the latest switch osciallor count
 			for (int i = 3; i >= 0; --i) {
 				if (wave_type < 0){
-					oled.printf("Select type of wave\n");
-					oled.printf("Square:2 Triangle:1 Sine:0");
-					if (switch_pressed[i] && !last_pressed[i])
+					if (switch_pressed[i] && !last_pressed[i]){
 						wave_type = i;
+						oled.setTextCursor(0, 0);
+					}
 				} else {
 					current_f[i] += (switch_pressed[i] && !last_pressed[i]);
 					if (current_f[i] > 9)
@@ -100,10 +101,10 @@ int main(void)
 				if (frequency){
 					switch(wave_type){
 						case 1:
-							pwm.attach_us( &square, 1000000 / (frequency * SINA_SIZE));
+							pwm.attach_us( &triangle, 1000000 / (frequency * SINA_SIZE));
 							break;
 						case 0:
-							pwm.attach_us( &triangle, 1000000 / (frequency * 100));
+							pwm.attach_us( &sine, 1000000 / (frequency * 100));
 							break;
 						default:
 							pwm.attach_us( &square, 1000000 / (frequency * 2));
