@@ -39,6 +39,8 @@ uint16_t sineArray[SINA_SIZE];
 
 int wave_type = -1;
 
+int triangleDirection = 1;
+
 // Initialise display
 SPInit gSpi(D_MOSI_PIN, NC, D_CLK_PIN);
 Adafruit_SSD1306_Spi oled(gSpi, D_DC_PIN, D_RST_PIN, D_CS_PIN, 64, 128);
@@ -143,10 +145,10 @@ void square(void){
 
 void triangle(void)
 {
-	amp++;
+	amp += triangleDirection;
 	out_wave = (float)amp / 100;
-	if (amp == 100)
-		amp = 0;
+	if (amp == 100 || amp == 0)
+		triangleDirection = triangleDirection*-1;
 }
 
 void sine(void)
@@ -156,3 +158,4 @@ void sine(void)
 	out_wave.write_u16(sineArray[amp]);
 	amp++;
 }
+
