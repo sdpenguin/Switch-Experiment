@@ -1,0 +1,44 @@
+From ecf88a2af2dd05098a978a5a14e032fd29c47edf Mon Sep 17 00:00:00 2001
+From: Waleed El-Geresy <waleed.el-geresy15@imperial.ac.uk>
+Date: Thu, 11 May 2017 09:41:03 +0100
+Subject: [PATCH] Change to triangle not sawtooth
+
+---
+ src/main.cpp | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/src/main.cpp b/src/main.cpp
+index 5e0c471..64231fc 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -39,6 +39,8 @@ uint16_t sineArray[SINA_SIZE];
+ 
+ int wave_type = -1;
+ 
++int triangleDirection = 1;
++
+ // Initialise display
+ SPInit gSpi(D_MOSI_PIN, NC, D_CLK_PIN);
+ Adafruit_SSD1306_Spi oled(gSpi, D_DC_PIN, D_RST_PIN, D_CS_PIN, 64, 128);
+@@ -143,10 +145,10 @@ void square(void){
+ 
+ void triangle(void)
+ {
+-	amp++;
++	amp += triangleDirection;
+ 	out_wave = (float)amp / 100;
+-	if (amp == 100)
+-		amp = 0;
++	if (amp == 100 || amp == 0)
++		triangleDirection = triangleDirection*-1;
+ }
+ 
+ void sine(void)
+@@ -156,3 +158,4 @@ void sine(void)
+ 	out_wave.write_u16(sineArray[amp]);
+ 	amp++;
+ }
++
+-- 
+1.9.0.msysgit.0
+
